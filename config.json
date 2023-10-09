@@ -1,0 +1,12 @@
+{
+    "storageAccountName": "chillbotbackuptest",
+    "storageAccountKey": "B717Tdc8MU+sM47MKmaXI09H/+VI3pJgDdokzJyz28hZqgXTx9gGiFY8+25yIKWs9o2J+1ueN1eh+ASttQ9o7A==",
+    "containerName": "chillbotbackuptest",
+    "localBackupFolder": "/home/rayala/Desktop/SAPBackup",
+    "notificationEmailTo": "ravi.chinni@zelarsoft.com",
+    "notificationEmailFrom": "rayala.naresh@zelarsoft.com",
+    "smtpServer": "smtp.sendgrid.net",
+    "smtpPort": 587,
+    "smtpUsername": "rayala.naresh@zelarsoft.com",
+    "smtpPassword": "Terraform@0103"
+}

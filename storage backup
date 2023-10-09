@@ -1,35 +1,80 @@
-# Use cases/ Test cases:
-# 1. Only backup current date's folder and not older folders. And delete older date's folder > X days locally
-# 2. Delete cloud backups older than X days 
-# 3. Verify that the backup succeeded.
-# 4. Notification on success/ failure in UI, Email
-# 5. Trace logging to a text file.
-# 6. Read configuration values from XML/ JSON
-$storageAccountName = "chillbotbackuptest"
-$storageAccountKey = "B717Tdc8MU+sM47MKmaXI09H/+VI3pJgDdokzJyz28hZqgXTx9gGiFY8+25yIKWs9o2J+1ueN1eh+ASttQ9o7A=="
-$containerName = "chillbotbackuptest"
+# Load configuration from JSON file
+$configPath = "/home/rayala/storagebackup/powershell/config.json" 
+$config = Get-Content -Raw -Path $configPath | ConvertFrom-Json
 
-# Set the local backup folder path
-$localBackupFolder = "C:\SAPBackup"
+# Extract configuration values
+$storageAccountName = $config.storageAccountName
+$storageAccountKey = $config.storageAccountKey
+$containerName = $config.containerName
+$localBackupFolder = $config.localBackupFolder
+# $notificationEmailTo = $config.notificationEmailTo
+# $notificationEmailFrom = $config.notificationEmailFrom
+# $smtpServer = $config.smtpServer
+# $smtpPort = $config.smtpPort
+# $smtpUsername = $config.smtpUsername
+# $smtpPassword = $config.smtpPassword
 
-# Create a folder with today's date for the backup
+$Username ="rayala.naresh@zelarsoft.com"
+$Password = ConvertTo-SecureString "Terraform@0103" -AsPlainText -Force
+$credential = New-Object System.Management.Automation.PSCredential $Username, $Password
+$SMTPServer = "smtp.sendgrid.net"
+$EmailFrom = "rayala.naresh@zelarsoft.com"
+$EmailTo = "ravi.chinni@zelarsoft.com"
+$Subject = "Backup Progress
+$Body = ""Backup successful"
+
+Send-MailMessage -smtpServer $SMTPServer -Credential $credential -Usessl -Port 587 -from $EmailFrom -to $EmailTo -subject $Subject -Body $Body
+
+# Set the folder with today's date for the backup
 $backupFolder = Join-Path -Path $localBackupFolder -ChildPath (Get-Date -Format "yyyyMMdd")
 
-# # Create the backup folder if it doesn't exist
-# if (-not (Test-Path -Path $backupFolder)) {
-#     New-Item -Path $backupFolder -ItemType Directory
-# }
+# Function to send email notification
+function Send-EmailNotification($subject, $body) {
+    # Send-MailMessage -SmtpServer $smtpServer -Port $smtpPort -UseSsl -From $notificationEmailFrom -To $notificationEmailTo -Subject $subject -Body $body -Credential (New-Object System.Management.Automation.PSCredential ($smtpUsername, (ConvertTo-SecureString $smtpPassword -AsPlainText -Force)))
+    Send-MailMessage -smtpServer $SMTPServer -Credential $credential -Usessl -Port 587 -from $EmailFrom -to $EmailTo -subject $Subject -Body $Body
+}
 
-# Perform the backup operation here, replace with your SAP backup command
-# For example:
-# Invoke-SapBackupCommand -BackupPath $backupFolder
 
-# Upload the backup to Azure Blob Storage
-$storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
-$backupFiles = Get-ChildItem -Path $backupFolder
-foreach ($file in $backupFiles) {
-    $blobName = "$backupFolder/$($file.Name)"
-    Set-AzStorageBlobContent -File $file.FullName -Container $containerName -Blob $blobName -Context $storageContext -Force
+# Create a function to log the output to a text file
+function Log-Output($text, $logFilePath) {
+    $text | Out-File -Append -FilePath $logFilePath
+}
+
+# Define the log file paths for different steps
+$backupLogFilePath = "~/backuplog\backup.log"
+
+try {
+    # Perform the backup operation here, replace with your SAP backup command
+    # For example:
+    # $backupOutput = Invoke-SapBackupCommand -BackupPath $backupFolder
+
+    # Log the backup output
+    # Log-Output $backupOutput $backupLogFilePath
+
+    # Upload the backup to Azure Blob Storage
+    $storageContext = New-AzStorageContext -StorageAccountName $storageAccountName -StorageAccountKey $storageAccountKey
+    $backupFiles = Get-ChildItem -Path $backupFolder
+    foreach ($file in $backupFiles) {
+        $blobName = "$backupFolder/$($file.Name)"
+        $uploadOutput = Set-AzStorageBlobContent -File $file.FullName -Container $containerName -Blob $blobName -Context $storageContext -Force
+
+        # Log the upload output
+        Log-Output $uploadOutput $uploadLogFilePath
+    }
+
+    # Notify on success
+    Send-EmailNotification "Backup Succeeded" "The backup process completed successfully."
+
+    # Log the success notification
+    Log-Output "Backup Succeeded" $backupLogFilePath
+
+} catch {
+    # Notify on error
+    $errorMessage = $_.Exception.Message
+    Send-EmailNotification "Backup Failed" "An error occurred during the backup process:`n$errorMessage"
+
+    # Log the error notification
+    Log-Output "Backup Failed`n$errorMessage" $backupLogFilePath
 }
 
 # Get a list of all blobs in the container
@@ -42,7 +87,9 @@ $deleteThreshold = (Get-Date).AddDays(-5)
 foreach ($blob in $blobs) {
     $blobDate = [DateTime]::Parse($blob.Name.Substring(0, 8))
     if ($blobDate -lt $deleteThreshold) {
-        Remove-AzStorageBlob -Container $containerName -Blob $blob.Name -Context $storageContext -Force
+        $deleteOutput = Remove-AzStorageBlob -Container $containerName -Blob $blob.Name -Context $storageContext -Force
+
+        # Log the delete output
+        Log-Output $deleteOutput $backupLogFilePath
     }
 }
-
