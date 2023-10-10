@@ -1,12 +1,12 @@
 {
-    "storageAccountName": "**************************",
-    "storageAccountKey": "**************************************************",
-    "containerName": "***************************",
+    "storageAccountName": "SAnamewheredataneedtostore",
+    "storageAccountKey": "SAkey",
+    "containerName": "containernameinSA",
     "localBackupFolder": "/home/rayala/Desktop/SAPBackup",
-    "notificationEmailTo": "abc@abc.com",
-    "notificationEmailFrom": "bcd@abc.com",
+    "notificationEmailTo": "receivermailid",
+    "notificationEmailFrom": "sendermailid",
     "smtpServer": "smtp.sendgrid.net",
     "smtpPort": 587,
-    "smtpUsername": "bcdh@abc.com",
-    "smtpPassword": "**********************"
+    "smtpUsername": "smtpusername",
+    "smtpPassword": "smtpPassword"
 }
