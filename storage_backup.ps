@@ -14,12 +14,12 @@ $localBackupFolder = $config.localBackupFolder
 # $smtpUsername = $config.smtpUsername
 # $smtpPassword = $config.smtpPassword
 
-$Username ="rayala.naresh@zelarsoft.com"
-$Password = ConvertTo-SecureString "Terraform@0103" -AsPlainText -Force
+$Username ="provideusername"
+$Password = ConvertTo-SecureString "providepasswordhere" -AsPlainText -Force
 $credential = New-Object System.Management.Automation.PSCredential $Username, $Password
 $SMTPServer = "smtp.sendgrid.net"
-$EmailFrom = "rayala.naresh@zelarsoft.com"
-$EmailTo = "ravi.chinni@zelarsoft.com"
+$EmailFrom = "sendermailid"
+$EmailTo = "receivermailid"
 $Subject = "Backup Progress
 $Body = ""Backup successful"
 
