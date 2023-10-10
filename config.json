@@ -1,0 +1,12 @@
+{
+    "storageAccountName": "**************************",
+    "storageAccountKey": "**************************************************",
+    "containerName": "***************************",
+    "localBackupFolder": "/home/rayala/Desktop/SAPBackup",
+    "notificationEmailTo": "abc@abc.com",
+    "notificationEmailFrom": "bcd@abc.com",
+    "smtpServer": "smtp.sendgrid.net",
+    "smtpPort": 587,
+    "smtpUsername": "bcdh@abc.com",
+    "smtpPassword": "**********************"
+}
